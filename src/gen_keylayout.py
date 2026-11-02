@@ -17,6 +17,8 @@ BASE = {
     37:("l","L"),38:("j","J"),39:("'","\""),40:("k","K"),41:(";",":"),42:("\\","|"),
     43:(",","<"),44:("/","?"),45:("n","N"),46:("m","M"),47:(".",">"),50:("`","~"),
     49:(" "," "),48:("\t","\t"),36:("\r","\r"),
+    # Backspace (macOS virtual key code 51)
+    51:("\b","\b"),
     # keypad
     65:(".","."),67:("*","*"),69:("+","+"),75:("/","/"),78:("-","-"),81:("=","="),
     76:("\r","\r"),82:("0","0"),83:("1","1"),84:("2","2"),85:("3","3"),86:("4","4"),
@@ -50,7 +52,11 @@ SOPT = {
 }
 SOPT_ACTION = {24:"deadCaron", 50:"deadRing"}  # = and `
 
-def o(ch): return esc(ch, {'"':"&quot;"})
+def o(ch):
+    # XML 1.0 cannot contain C0 controls literally, but keylayout uses their
+    # numeric character references for editing keys such as Backspace.
+    controls = {"\b": "&#x0008;"}
+    return controls.get(ch, esc(ch, {'"':"&quot;"}))
 
 def char_for(code, upper):
     lo,up = BASE[code]
