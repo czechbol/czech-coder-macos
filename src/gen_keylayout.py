@@ -9,6 +9,8 @@ from xml.sax.saxutils import escape as esc
 # code: (lower, upper) for US ANSI printable + space/tab/return + keypad
 BASE = {
     0:("a","A"),1:("s","S"),2:("d","D"),3:("f","F"),4:("h","H"),5:("g","G"),
+    # ISO key below Esc (also what some boards send for Esc-as-backtick); matches cz(coder)
+    10:("`","~"),
     6:("z","Z"),7:("x","X"),8:("c","C"),9:("v","V"),11:("b","B"),12:("q","Q"),
     13:("w","W"),14:("e","E"),15:("r","R"),16:("y","Y"),17:("t","T"),
     18:("1","!"),19:("2","@"),20:("3","#"),21:("4","$"),22:("6","^"),23:("5","%"),
@@ -40,7 +42,7 @@ for m in STATES.values():
 
 # Option-layer overrides (keyMap 2). code -> literal output
 OPT = {
-    50:";", 19:"ě",20:"š",21:"č",23:"ř",22:"ž",26:"ý",28:"á",25:"í",29:"é",
+    50:";", 10:";", 19:"ě",20:"š",21:"č",23:"ř",22:"ž",26:"ý",28:"á",25:"í",29:"é",
     33:"ú",41:"ů",39:"§",
 }
 OPT_ACTION = {24:"deadAcute", 42:"deadDia"}   # = and \
@@ -50,7 +52,7 @@ SOPT = {
     19:"Ě",20:"Š",21:"Č",23:"Ř",22:"Ž",26:"Ý",28:"Á",25:"Í",29:"É",
     14:"€",33:"Ú",41:"Ů",39:"\"",42:"'",
 }
-SOPT_ACTION = {24:"deadCaron", 50:"deadRing"}  # = and `
+SOPT_ACTION = {24:"deadCaron", 50:"deadRing", 10:"deadRing"}  # = and ` (and ISO key)
 
 def o(ch):
     # XML 1.0 cannot contain C0 controls literally, but keylayout uses their
