@@ -4,7 +4,6 @@
 # Option layer keeps all normal letters (overrides only diacritic keys),
 # so you can hold Option for a whole sentence and still type plain text.
 
-from xml.sax.saxutils import escape as esc
 
 # code: (lower, upper) for US ANSI printable + space/tab/return + keypad
 BASE = {
@@ -57,8 +56,10 @@ SOPT_ACTION = {24:"deadCaron", 50:"deadRing", 10:"deadRing"}  # = and ` (and ISO
 def o(ch):
     # XML 1.0 cannot contain C0 controls literally, but keylayout uses their
     # numeric character references for editing keys such as Backspace.
-    controls = {"\b": "&#x0008;"}
-    return controls.get(ch, esc(ch, {'"':"&quot;"}))
+    # Use numeric references, not named entities (&lt; &gt; &quot;): macOS's
+    # keylayout parser drops the named forms, so <, > and " never type.
+    refs = {"\b": "&#x0008;", "<": "&#x003C;", ">": "&#x003E;", "&": "&#x0026;", '"': "&#x0022;"}
+    return refs.get(ch, ch)
 
 def char_for(code, upper):
     lo,up = BASE[code]
