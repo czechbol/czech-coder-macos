@@ -4,7 +4,7 @@
 macOS (12.4+) shows a monochrome text badge for each layout instead of a flag.
 Black-on-transparent icons are auto-inverted by macOS in dark mode (template).
 
-Writes a real PNG-based .icns with no external tools (pure Pillow + stdlib).
+Needs only Python 3 and Pillow, so it runs on any OS.
 
 Usage:
     python3 src/gen_icon.py "CZ" "Czech Coder.icns"
@@ -58,32 +58,17 @@ def render_image(text: str, size: int = 1024, pad: float = 0.08) -> Image.Image:
     return img
 
 
-# icns OSType -> pixel size. PNG payloads are accepted for these since OS X 10.7.
-ICNS_TYPES = [
-    (b"icp4", 16), (b"icp5", 32), (b"icp6", 64),
-    (b"ic07", 128), (b"ic08", 256), (b"ic09", 512), (b"ic10", 1024),
-    (b"ic11", 32), (b"ic12", 64), (b"ic13", 256), (b"ic14", 512),
-]
+# Sizes macOS reads from an .icns (PNG payloads, 128 px and up plus 32/64 px for 2x menus).
+ICNS_SIZES = [(32, 32), (64, 64), (128, 128), (256, 256), (512, 512), (1024, 1024)]
 
 
 def write_icns(master: Image.Image, icns: Path) -> None:
-    """Pack a real PNG-based .icns directly (no external tools).
+    """Write an .icns with Pillow's built-in writer (no macOS tools needed).
 
-    ImageMagick on Linux lacks an icns encoder and silently writes a PNG with
-    an .icns name, which macOS can't parse and crashes the input-source picker.
+    Pixel-identical to Apple's iconutil output for the same master image.
+    Hand-packed icns files with icp4/icp5/icp6 payloads rendered as a blank square.
     """
-    import io
-    import struct
-
-    entries = []
-    for ostype, px in ICNS_TYPES:
-        buf = io.BytesIO()
-        master.resize((px, px), Image.LANCZOS).save(buf, format="PNG")
-        data = buf.getvalue()
-        entries.append(ostype + struct.pack(">I", len(data) + 8) + data)
-    body = b"".join(entries)
-    with open(icns, "wb") as fh:
-        fh.write(b"icns" + struct.pack(">I", len(body) + 8) + body)
+    master.save(icns, format="ICNS", sizes=ICNS_SIZES)
 
 
 def main() -> None:
